@@ -1,0 +1,16 @@
+node_modules
+.mastra
+dist
+data
+.git
+.gitignore
+.env
+.env.*
+!.env.example
+*.log
+.DS_Store
+.vscode
+.idea
+README.md
+docs
+docker-compose.yaml

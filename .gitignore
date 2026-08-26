@@ -1,0 +1,13 @@
+node_modules
+.mastra
+dist
+data
+*.db
+*.db-journal
+.env
+.env.local
+.env.production
+*.log
+.DS_Store
+.vscode
+.idea

@@ -1,0 +1,51 @@
+# Two uses for this file:
+#
+#   1. Local smoke test before you push:  docker compose up --build
+#   2. Coolify "Docker Compose" build pack, if you prefer it over the
+#      Dockerfile build pack. Uncomment the labels block and set your own
+#      basic-auth hash + domain.
+#
+# With the Dockerfile build pack (the recommended path) Coolify ignores this
+# file entirely and builds ./Dockerfile directly.
+
+services:
+  mastra:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      PORT: 4111
+      MASTRA_HOST: 0.0.0.0
+      MASTRA_STUDIO_PATH: /app/.mastra/output/studio
+      MASTRA_DB_URL: file:/app/data/mastra.db
+      MASTRA_TELEMETRY_DISABLED: 1
+      LOG_LEVEL: info
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      # Optional app-level auth on top of basic auth
+      MASTRA_API_KEY: ${MASTRA_API_KEY:-}
+      MASTRA_CORS_ORIGIN: ${MASTRA_CORS_ORIGIN:-*}
+    ports:
+      - '4111:4111'
+    volumes:
+      - mastra-data:/app/data
+    healthcheck:
+      test: ['CMD', 'curl', '-fsS', 'http://127.0.0.1:4111/health']
+      interval: 30s
+      timeout: 5s
+      start_period: 30s
+      retries: 3
+
+    # ---- Coolify Docker Compose build pack only ----
+    # labels:
+    #   - traefik.enable=true
+    #   - traefik.http.routers.mastra.rule=Host(`studio.example.com`)
+    #   - traefik.http.routers.mastra.entrypoints=https
+    #   - traefik.http.routers.mastra.tls.certresolver=letsencrypt
+    #   - traefik.http.services.mastra.loadbalancer.server.port=4111
+    #   # Generate with: htpasswd -nbB admin 'your-password'
+    #   - "traefik.http.middlewares.mastraauth.basicauth.users=admin:\$2y\$12\$REPLACE_ME"
+    #   - traefik.http.routers.mastra.middlewares=mastraauth
+
+volumes:
+  mastra-data:
